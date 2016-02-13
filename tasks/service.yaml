@@ -1,0 +1,48 @@
+# Copyright 2015 Red Hat, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+---
+- name: Define consul_file_consul_service_dest.
+  set_fact:
+    consul_file_consul_service_dest: "{{ __consul_file_consul_service_dest }}"
+  when: consul_file_consul_service_dest is not defined
+
+- name: Define consul_file_consul_service_mode.
+  set_fact:
+    consul_file_consul_service_mode: "{{ __consul_file_consul_service_mode }}"
+  when: consul_file_consul_service_mode is not defined
+
+- name: Define consul_file_consul_service_src.
+  set_fact:
+    consul_file_consul_service_src: "{{ __consul_file_consul_service_src }}"
+  when: consul_file_consul_service_src is not defined
+
+- include: service/debian.yaml
+  when: ansible_os_family == 'Debian'
+
+- include: service/redhat.yaml
+  when: ansible_os_family == 'RedHat'
+
+- name: Copy consul services scripts into place.
+  copy:
+    dest: "{{ consul_file_consul_service_dest }}"
+    group: "{{ consul_file_consul_service_group }}"
+    mode: "{{ consul_file_consul_service_mode }}"
+    owner: "{{ consul_file_consul_service_owner }}"
+    src: "{{ consul_file_consul_service_src }}"
+
+- name: Enable consul service.
+  service:
+    enabled: "{{ consul_service_consul_enabled }}"
+    name: "{{ consul_service_consul_name }}"
+    state: "{{ consul_service_consul_state }}"
